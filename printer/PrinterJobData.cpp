@@ -1,10 +1,10 @@
 #include "PrinterJobData.h"
 
 PrinterJobData::PrinterJobData(const Label &label) noexcept {
-    label_type = Label::LABEL_TYPE;
-    label_width = Label::LABEL_WIDTH_MM;
-    label_height = Label::LABEL_HEIGHT_MM;
-    raster_number = Label::LABEL_WIDTH;
+    label_type = Label::label_type;
+    label_width = Label::dimensions.width_mm;
+    label_height = Label::dimensions.height_mm;
+    raster_number = Label::dimensions.width_pt;
 
     starting_page = true;
     auto_cut = false;
