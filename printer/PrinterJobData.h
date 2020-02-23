@@ -21,15 +21,15 @@ private:
     bool high_quality;
     bool print_600dpi;
 
-    uint16_t margin_amount;
+    uint8_t margin_amount;
 
 public:
     explicit PrinterJobData(const Label& label) noexcept;
 
     void set_is_starting_page(bool starting_page) noexcept;
-    void set_cut_options(bool auto_cut, uint8_t cut_every_x_labels, bool cut_at_end) noexcept;
-    void set_quality(bool high_quality, bool print_600dpi) noexcept;
-    void set_margin_amount(uint16_t margin_amount) noexcept;
+    void set_auto_cut_options(bool auto_cut, uint8_t cut_every_x_labels = 1) noexcept;
+    void set_cut_at_end(bool cut_at_end) noexcept;
+    void set_quality(bool high_quality) noexcept;
 
     [[nodiscard]] std::vector<uint8_t> construct_job_data_message() const noexcept;
 };
