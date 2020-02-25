@@ -35,13 +35,15 @@ void Label::set_die_cut_label_type(LabelSubtypes::DieCut _label_type, const bool
         Label::dimensions.width_pt *= 2;
 }
 
-void Label::set_continuous_length_label_type(LabelSubtypes::ContinuousLength _label_type, const bool high_quality) noexcept {
+void Label::set_continuous_length_label_type(LabelSubtypes::ContinuousLength _label_type, const int width_mm, const bool high_quality) noexcept {
     const auto& lab_it = LabelSubtypes::continuous_length_dimensions.find(_label_type);
     if(lab_it == LabelSubtypes::continuous_length_dimensions.end())
         throw std::runtime_error("This label type is not supported");
 
     Label::label_type = LabelType::CONTINUOUS_LENGTH;
-    Label::dimensions = lab_it->second;
+    Label::dimensions.height_mm = lab_it->second.height_mm;
+    Label::dimensions.width_mm = width_mm;
+    Label::dimensions.width_pt = static_cast<uint32_t>(round(width_mm * 0.03937 * 300));
 
     if(high_quality)
         Label::dimensions.width_pt *= 2;
