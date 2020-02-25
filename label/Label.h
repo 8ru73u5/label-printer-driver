@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <cairo/cairo.h>
+#include <yaml-cpp/yaml.h>
 
 enum class ProductUsage {
     BOARD,
@@ -76,6 +77,8 @@ private:
     std::vector<uint8_t> prepare_for_printing(cairo_surface_t *surface) const noexcept;
     inline static bool thresh(const unsigned char *pix, int threshold = 190) noexcept;
 
+    static Label from_yaml_node(const YAML::Node& node, ProductUsage usage);
+
 public:
     Label(std::string product, ProductUsage usage, std::string start, std::optional<std::string> ready, std::string end) noexcept;
     Label(std::string product, ProductUsage usage, std::string start, std::string end) noexcept;
@@ -84,6 +87,8 @@ public:
     static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength _label_type, int width_mm, bool high_quality = false) noexcept;
 
     [[nodiscard]] std::vector<uint8_t> get_printing_data() const noexcept;
+
+    [[nodiscard]] static std::vector<Label> load_label_definitions(const std::string& def_file);
 
     friend class LabelCreator;
     friend class PrinterJobData;

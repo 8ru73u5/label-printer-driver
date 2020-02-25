@@ -23,6 +23,27 @@ Label::Label(std::string product, ProductUsage usage, std::string start, std::op
 Label::Label(std::string product, ProductUsage usage, std::string start, std::string end) noexcept
         : Label(std::move(product), usage, std::move(start), std::nullopt, std::move(end)) {}
 
+Label Label::from_yaml_node(const YAML::Node &node, const ProductUsage usage) {
+    const auto name = node["name"].as<std::string>();
+
+    std::string usage_str {};
+    switch(usage) {
+        case ProductUsage::BOARD:   usage_str = "board";   break;
+        case ProductUsage::PREP:    usage_str = "prep";    break;
+        case ProductUsage::STORAGE: usage_str = "storage"; break;
+    }
+
+    std::optional<std::string> ready;
+    if(node[usage_str]["ready"])
+        ready = node[usage_str]["ready"].as<std::string>();
+    else
+        ready = std::nullopt;
+
+    const auto discard = node[usage_str]["discard"].as<std::string>();
+
+    return Label(name, usage, "", ready, discard);
+}
+
 void Label::set_die_cut_label_type(LabelSubtypes::DieCut _label_type, const bool high_quality) noexcept {
     const auto& lab_it = LabelSubtypes::die_cut_dimensions.find(_label_type);
     if(lab_it == LabelSubtypes::die_cut_dimensions.end())
@@ -101,4 +122,20 @@ std::vector<uint8_t> Label::get_printing_data() const noexcept {
     cairo_surface_destroy(label_surface);
 
     return printing_data;
+}
+
+std::vector<Label> Label::load_label_definitions(const std::string& def_file) {
+    const YAML::Node products = YAML::LoadFile(def_file)["products"];
+
+    std::vector<Label> labels {};
+    for(const auto& i: products) {
+        if(i["board"])
+            labels.push_back(Label::from_yaml_node(i, ProductUsage::BOARD));
+        if(i["prep"])
+            labels.push_back(Label::from_yaml_node(i, ProductUsage::PREP));
+        if(i["storage"])
+            labels.push_back(Label::from_yaml_node(i, ProductUsage::STORAGE));
+    }
+
+    return labels;
 }

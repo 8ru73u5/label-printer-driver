@@ -1,0 +1,15 @@
+products:
+  - name: Jalapenos
+    board:
+      ready: 2h
+      discard: DKD
+    prep:
+      discard: 30d
+
+  - name: Ketchup
+    board:
+      discard: 1d
+    prep:
+      discard: 1d
+    storage:
+      discard: 14d
