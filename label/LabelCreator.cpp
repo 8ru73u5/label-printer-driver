@@ -23,9 +23,9 @@ void LabelCreator::load_config(const std::string& _config_file) {
     _inst.usage_prep_text = root["usage_texts"]["prep"].as<std::string>();
     _inst.usage_storage_text = root["usage_texts"]["storage"].as<std::string>();
 
-    _inst.guide_width = root["guide_width"].as<float>();
-    _inst.text_box_margin_x = root["text_box_margins"]["x"].as<float>();
-    _inst.text_box_margin_y = root["text_box_margins"]["y"].as<float>();
+    _inst.guide_width = root["guide_width"].as<double>();
+    _inst.text_box_margin_x = root["text_box_margins"]["x"].as<double>();
+    _inst.text_box_margin_y = root["text_box_margins"]["y"].as<double>();
 
     for(const auto& guide: root["guides"]) {
         const Point start {guide["start"]["x"].as<double>(), guide["start"]["y"].as<double>()};
