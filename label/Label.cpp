@@ -9,19 +9,19 @@
 LabelType Label::label_type = LabelType::UNDEFINED;
 LabelDimensions Label::dimensions = {};
 
-Label::Label(std::string product, ProductUsage usage, std::string start, std::optional<std::string> ready, std::string end) noexcept
+Label::Label(std::string product, ProductUsage usage, std::string start, std::optional<std::string> ready, std::string discard) noexcept
         : product_name(std::move(product)),
-        product_usage(usage),
-        start_date(std::move(start)),
-        ready_date(std::move(ready)),
-        end_date(std::move(end)) {
+          product_usage(usage),
+          start_date(std::move(start)),
+          ready_date(std::move(ready)),
+          discard_date(std::move(discard)) {
 
     if(Label::label_type == LabelType::UNDEFINED)
         throw std::runtime_error("Label type not set! Use provided static function to set it");
 };
 
-Label::Label(std::string product, ProductUsage usage, std::string start, std::string end) noexcept
-        : Label(std::move(product), usage, std::move(start), std::nullopt, std::move(end)) {}
+Label::Label(std::string product, ProductUsage usage, std::string start, std::string discard) noexcept
+        : Label(std::move(product), usage, std::move(start), std::nullopt, std::move(discard)) {}
 
 Label Label::from_yaml_node(const YAML::Node &node, const ProductUsage usage) {
     const auto name = node["name"].as<std::string>();

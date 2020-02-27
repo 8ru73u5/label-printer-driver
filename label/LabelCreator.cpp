@@ -21,7 +21,7 @@ void LabelCreator::load_config(const std::string& _config_file) {
 
     _inst.start_date_text = root["start_date_text"].as<std::string>();
     _inst.ready_date_text = root["ready_date_text"].as<std::string>();
-    _inst.end_date_text = root["end_date_text"].as<std::string>();
+    _inst.discard_date_text = root["discard_date_text"].as<std::string>();
 
     _inst.usage_board_text = root["usage_texts"]["board"].as<std::string>();
     _inst.usage_prep_text = root["usage_texts"]["prep"].as<std::string>();
@@ -96,7 +96,7 @@ cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
     std::vector<std::pair<std::string, Binding>> date_texts {
             {_inst.start_date_text, Binding::START_DATE_TEXT},
             {_inst.ready_date_text, Binding::READY_DATE_TEXT},
-            {_inst.end_date_text, Binding::END_DATE_TEXT}
+            {_inst.discard_date_text, Binding::DISCARD_DATE_TEXT}
     };
 
     // Find the longest date text and set font size for it
@@ -118,7 +118,7 @@ cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
 
     auto now = std::chrono::system_clock::now();
     decltype(now) ready;
-    decltype(now) discard = now + detect_duration(label.end_date);
+    decltype(now) discard = now + detect_duration(label.discard_date);
 
     if(label.ready_date) {
         ready = now + detect_duration(label.ready_date.value());
@@ -126,7 +126,7 @@ cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
     }
 
     dates.insert({date_to_str(now), Binding::START_DATE});
-    dates.insert({date_to_str(discard), Binding::END_DATE});
+    dates.insert({date_to_str(discard), Binding::DISCARD_DATE});
 
     /* Draw dates */
     for(const auto& i: dates)

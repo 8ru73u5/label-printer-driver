@@ -33,20 +33,20 @@ namespace {
         PRODUCT_NAME,
         START_DATE_TEXT,
         READY_DATE_TEXT,
-        END_DATE_TEXT,
+        DISCARD_DATE_TEXT,
         START_DATE,
         READY_DATE,
-        END_DATE
+        DISCARD_DATE
     };
 
     const std::map<std::string, Binding> __bindings {
             {"product_name", Binding::PRODUCT_NAME},
             {"start_date_text", Binding::START_DATE_TEXT},
             {"ready_date_text", Binding::READY_DATE_TEXT},
-            {"end_date_text", Binding::END_DATE_TEXT},
+            {"discard_date_text", Binding::DISCARD_DATE_TEXT},
             {"start_date", Binding::START_DATE},
             {"ready_date", Binding::READY_DATE},
-            {"end_date", Binding::END_DATE}
+            {"discard_date", Binding::DISCARD_DATE}
     };
 
     struct Font {
@@ -80,7 +80,7 @@ private:
 
     std::string start_date_text;
     std::string ready_date_text;
-    std::string end_date_text;
+    std::string discard_date_text;
 
     std::string date_format;
 

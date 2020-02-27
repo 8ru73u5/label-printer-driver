@@ -9,7 +9,7 @@ date_format: "%d.%m - %H:%M"
 
 start_date_text: "Data wyjęcia:"
 ready_date_text: "Data gotowości:"
-end_date_text:   "Data przydatności:"
+discard_date_text:   "Data przydatności:"
 
 
 usage_texts:
@@ -84,7 +84,7 @@ text_boxes:
       x: 0.5
       y: 0.4
 
-  - bind_to: end_date_text
+  - bind_to: discard_date_text
     align: right
     bottom_left:
       x: 0.0
@@ -111,7 +111,7 @@ text_boxes:
       x: 1.0
       y: 0.4
 
-  - bind_to: end_date
+  - bind_to: discard_date
     align: center
     bottom_left:
       x: 0.5

@@ -72,7 +72,7 @@ private:
     const ProductUsage product_usage;
     const std::string start_date;
     const std::optional<std::string> ready_date;
-    const std::string end_date;
+    const std::string discard_date;
 
     std::vector<uint8_t> prepare_for_printing(cairo_surface_t *surface) const noexcept;
     inline static bool thresh(const unsigned char *pix, int threshold = 190) noexcept;
@@ -80,8 +80,8 @@ private:
     static Label from_yaml_node(const YAML::Node& node, ProductUsage usage);
 
 public:
-    Label(std::string product, ProductUsage usage, std::string start, std::optional<std::string> ready, std::string end) noexcept;
-    Label(std::string product, ProductUsage usage, std::string start, std::string end) noexcept;
+    Label(std::string product, ProductUsage usage, std::string start, std::optional<std::string> ready, std::string discard) noexcept;
+    Label(std::string product, ProductUsage usage, std::string start, std::string discard) noexcept;
 
     static void set_die_cut_label_type(LabelSubtypes::DieCut _label_type, bool high_quality = false) noexcept;
     static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength _label_type, int width_mm, bool high_quality = false) noexcept;
