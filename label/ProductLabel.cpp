@@ -39,30 +39,35 @@ inline void ProductLabel::set_start_date(std::optional<std::time_t> start) noexc
 }
 
 std::vector<uint8_t> ProductLabel::prepare_for_printing(cairo_surface_t *surface) const {
-    const size_t data_size = Label::dimensions.width_pt * 93;
-    std::vector<uint8_t> printing_data(data_size, 0x00);
-    size_t idx = 0;
+    std::vector<uint8_t> printing_data {};
+    /*
+    Each packet consist of 3 bytes of print data command and 90 bytes of pixel data.
+    For each column of the label we need a separate packet.
+    */
+    printing_data.reserve(Label::dimensions.width_pt * 93);
 
     const unsigned char *label_data = cairo_image_surface_get_data(surface);
-    const int stride = cairo_image_surface_get_stride(surface);
-    const auto fill_amount = static_cast<size_t>(90 - std::ceil(Label::dimensions.height_pt / 8.0));  // Amount of zero-padding for each column
+    if(cairo_image_surface_get_format(surface) != CAIRO_FORMAT_RGB24)
+        throw std::runtime_error("Wrong label surface format - should be RGB24");
+
+    const int stride = cairo_image_surface_get_stride(surface);  // Number of bytes per label row
     const bool unaligned_pixels = Label::dimensions.height_pt % 8 != 0;
+    const auto fill_amount = static_cast<size_t>(90 - std::ceil(Label::dimensions.height_pt / 8.0));  // Amount of zero-padding for each column
 
-    constexpr std::array<uint8_t, 3> print_data_cmd {0x67, 0x00, 0x5a};
+    uint8_t pixel_octet = 0;    // Store subsequent pixel values
+    uint8_t pixels_packed = 7;  // Tell how many pixels are remaining in order to fill pixel_octet
 
-    uint8_t pixel_octet = 0;
-    uint8_t pixels_packed = 7;
-    for(int i = 0, offset = 0; i < Label::dimensions.width_pt; ++i, offset += 4) {
-        // Add print command
-        std::copy(print_data_cmd.begin(), print_data_cmd.end(), printing_data.begin() + idx);
-        idx += print_data_cmd.size();
+    for(auto i = 0, offset = 0; i < Label::dimensions.width_pt; ++i, offset += 4) {
+        // Add print data command to the beginning of the next packet
+        printing_data.insert(printing_data.end(), {0x67, 0x00, 0x5a});
 
-        for(int k = 0; k < Label::dimensions.height_pt; ++k) {
+        for(auto k = 0; k < Label::dimensions.height_pt; ++k) {
             const bool pixel = thresh(label_data + (k * stride + offset));
             pixel_octet |= static_cast<uint8_t>(pixel << pixels_packed);  // Set pixel value
 
+            // If all bits of the pixel octet are initialized, add it to the packet
             if(pixels_packed == 0) {
-                printing_data[idx++] = pixel_octet;
+                printing_data.push_back(pixel_octet);
                 pixel_octet = 0;
                 pixels_packed = 7;
             }
@@ -70,13 +75,15 @@ std::vector<uint8_t> ProductLabel::prepare_for_printing(cairo_surface_t *surface
                 --pixels_packed;
         }
 
+        // If label height is not divisible by 8, add an uncompleted pixel to the packet
         if(unaligned_pixels) {
-            printing_data[idx++] = pixel_octet;
+            printing_data.push_back(pixel_octet);
             pixel_octet = 0;
             pixels_packed = 7;
         }
 
-        idx += fill_amount;
+        // Fill the rest of the packet with zeros
+        printing_data.insert(printing_data.end(), fill_amount, 0x00);
     }
 
     return printing_data;
