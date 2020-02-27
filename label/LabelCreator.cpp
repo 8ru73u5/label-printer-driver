@@ -2,6 +2,8 @@
 
 #include <yaml-cpp/yaml.h>
 #include <algorithm>
+#include <chrono>
+#include <iomanip>
 
 LabelCreator LabelCreator::_inst {};
 
@@ -14,6 +16,8 @@ void LabelCreator::load_config(const std::string& _config_file) {
         __slants.at(root["global_font"]["slant"].as<std::string>()),
         __weights.at(root["global_font"]["weight"].as<std::string>())
     };
+
+    _inst.date_format = root["date_format"].as<std::string>();
 
     _inst.start_date_text = root["start_date_text"].as<std::string>();
     _inst.ready_date_text = root["ready_date_text"].as<std::string>();
@@ -109,16 +113,22 @@ cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
     for(const auto& i: date_texts)
         _inst.print_text(cr, i.first, i.second);
 
+    /* Calculate dates */
+    std::map<std::string, Binding> dates {};
+
+    auto now = std::chrono::system_clock::now();
+    decltype(now) ready;
+    decltype(now) discard = now + detect_duration(label.end_date);
+
+    if(label.ready_date) {
+        ready = now + detect_duration(label.ready_date.value());
+        dates.insert({date_to_str(ready), Binding::READY_DATE});
+    }
+
+    dates.insert({date_to_str(now), Binding::START_DATE});
+    dates.insert({date_to_str(discard), Binding::END_DATE});
+
     /* Draw dates */
-    std::map<std::string, Binding> dates {
-            {label.start_date, Binding::START_DATE},
-            {label.end_date, Binding::END_DATE}
-    };
-
-    // Add ready_date if the label has it
-    if(label.ready_date)
-        dates[label.ready_date.value()] = Binding::READY_DATE;
-
     for(const auto& i: dates)
         _inst.print_text(cr, i.first, i.second);
 
@@ -186,4 +196,29 @@ void LabelCreator::export_to_png(const Label &label, const std::string& filename
     cairo_surface_t *surface = LabelCreator::create_label_surface(label);
     cairo_surface_write_to_png(surface, filename.c_str());
     cairo_surface_destroy(surface);
+}
+
+std::chrono::hours LabelCreator::detect_duration(const std::string &date) {
+    const char interval_specifier = date[date.size() - 1];
+
+    int interval;
+    switch(interval_specifier) {
+        case 'h': interval = std::stoi(date);      break;
+        case 'd': interval = std::stoi(date) * 24; break;
+        default:
+            throw std::invalid_argument("Not implemented interval specifier");
+    }
+
+    return std::chrono::hours(interval);
+}
+
+std::string LabelCreator::date_to_str(const std::chrono::system_clock::time_point& base) {
+    std::stringstream buffer {};
+
+    const std::time_t base_time = std::chrono::system_clock::to_time_t(base);
+    const std::tm *t = std::localtime(&base_time);
+
+    buffer << std::put_time(t, _inst.date_format.c_str());
+
+    return buffer.str();
 }

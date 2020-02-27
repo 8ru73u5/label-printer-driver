@@ -4,6 +4,9 @@ global_font:
   weight: bold
 
 
+date_format: "%d.%m - %H:%M"
+
+
 start_date_text: "Data wyjęcia:"
 ready_date_text: "Data gotowości:"
 end_date_text:   "Data przydatności:"

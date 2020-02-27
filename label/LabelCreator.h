@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <cairo/cairo.h>
+#include <chrono>
 #include "Label.h"
 
 namespace {
@@ -81,6 +82,8 @@ private:
     std::string ready_date_text;
     std::string end_date_text;
 
+    std::string date_format;
+
     std::string usage_board_text;
     std::string usage_prep_text;
     std::string usage_storage_text;
@@ -96,6 +99,10 @@ private:
 
     void calculate_font_size(cairo_t *cr, const std::string& text, Binding bind);
     void print_text(cairo_t *cr, const std::string& text, Binding bind);
+
+    static std::chrono::hours detect_duration(const std::string& date);
+    static std::string date_to_str(const std::chrono::system_clock::time_point& date);
+
 
     LabelCreator() = default;
     static LabelCreator _inst;
