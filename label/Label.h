@@ -6,6 +6,7 @@
 #include <vector>
 #include <cairo/cairo.h>
 #include <yaml-cpp/yaml.h>
+#include <ctime>
 
 enum class ProductUsage {
     BOARD,
@@ -70,7 +71,7 @@ private:
 
     const std::string product_name;
     const ProductUsage product_usage;
-    const std::string start_date;
+    std::optional<std::time_t> start_date;
     const std::optional<std::string> ready_date;
     const std::string discard_date;
 
@@ -80,8 +81,9 @@ private:
     static Label from_yaml_node(const YAML::Node& node, ProductUsage usage);
 
 public:
-    Label(std::string product, ProductUsage usage, std::string start, std::optional<std::string> ready, std::string discard) noexcept;
-    Label(std::string product, ProductUsage usage, std::string start, std::string discard) noexcept;
+    Label(std::string product, ProductUsage usage, std::optional<std::time_t> start, std::optional<std::string> ready, std::string discard) noexcept;
+
+    void set_start_date(std::optional<std::time_t> start) noexcept;
 
     static void set_die_cut_label_type(LabelSubtypes::DieCut _label_type, bool high_quality = false) noexcept;
     static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength _label_type, int width_mm, bool high_quality = false) noexcept;

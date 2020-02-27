@@ -116,7 +116,7 @@ cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
     /* Calculate dates */
     std::map<std::string, Binding> dates {};
 
-    auto now = std::chrono::system_clock::now();
+    auto now = label.start_date ? std::chrono::system_clock::from_time_t(label.start_date.value()) : std::chrono::system_clock::now();
     decltype(now) ready;
     decltype(now) discard = now + detect_duration(label.discard_date);
 

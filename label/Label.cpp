@@ -9,10 +9,10 @@
 LabelType Label::label_type = LabelType::UNDEFINED;
 LabelDimensions Label::dimensions = {};
 
-Label::Label(std::string product, ProductUsage usage, std::string start, std::optional<std::string> ready, std::string discard) noexcept
+Label::Label(std::string product, ProductUsage usage, std::optional<std::time_t> start, std::optional<std::string> ready, std::string discard) noexcept
         : product_name(std::move(product)),
           product_usage(usage),
-          start_date(std::move(start)),
+          start_date(start),
           ready_date(std::move(ready)),
           discard_date(std::move(discard)) {
 
@@ -20,8 +20,9 @@ Label::Label(std::string product, ProductUsage usage, std::string start, std::op
         throw std::runtime_error("Label type not set! Use provided static function to set it");
 };
 
-Label::Label(std::string product, ProductUsage usage, std::string start, std::string discard) noexcept
-        : Label(std::move(product), usage, std::move(start), std::nullopt, std::move(discard)) {}
+void Label::set_start_date(const std::optional<std::time_t> start) noexcept {
+    start_date = start;
+}
 
 Label Label::from_yaml_node(const YAML::Node &node, const ProductUsage usage) {
     const auto name = node["name"].as<std::string>();
@@ -41,7 +42,7 @@ Label Label::from_yaml_node(const YAML::Node &node, const ProductUsage usage) {
 
     const auto discard = node[usage_str]["discard"].as<std::string>();
 
-    return Label(name, usage, "", ready, discard);
+    return Label(name, usage, std::nullopt, ready, discard);
 }
 
 void Label::set_die_cut_label_type(LabelSubtypes::DieCut _label_type, const bool high_quality) noexcept {
