@@ -102,7 +102,13 @@ std::vector<uint8_t> ProductLabel::get_printing_data() const {
 }
 
 std::vector<Label*> ProductLabel::load_label_definitions(const std::string &def_file) {
-    const YAML::Node products = YAML::LoadFile(def_file)["products"];
+    const YAML::Node root = YAML::LoadFile(def_file);
+    if(!root["products"])
+        throw std::runtime_error("No 'products' key found in label definition file: " + def_file);
+
+    const YAML::Node products = root["products"];
+    if(!products.IsSequence())
+        throw std::runtime_error("'products' should be a sequence in label definition file: " + def_file);
 
     std::vector<Label*> labels {};
     for(const auto& i: products) {
