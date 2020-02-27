@@ -1,5 +1,5 @@
-#ifndef LABEL_PRINTER_DRIVER_LABELCREATOR_H
-#define LABEL_PRINTER_DRIVER_LABELCREATOR_H
+#ifndef LABEL_PRINTER_DRIVER_PRODUCTLABELCREATOR_H
+#define LABEL_PRINTER_DRIVER_PRODUCTLABELCREATOR_H
 
 #include <string>
 #include <vector>
@@ -76,7 +76,7 @@ namespace {
     };
 }
 
-class LabelCreator {
+class ProductLabelCreator {
 private:
     Font global_font;
 
@@ -106,8 +106,8 @@ private:
     static std::string date_to_str(const std::chrono::system_clock::time_point& date);
 
 
-    LabelCreator() = default;
-    static LabelCreator _inst;
+    ProductLabelCreator() = default;
+    static ProductLabelCreator _inst;
 
 public:
     static void load_config(const std::string& config_file);
@@ -118,4 +118,4 @@ public:
 };
 
 
-#endif //LABEL_PRINTER_DRIVER_LABELCREATOR_H
+#endif //LABEL_PRINTER_DRIVER_PRODUCTLABELCREATOR_H

@@ -35,7 +35,7 @@ public:
 
     [[nodiscard]] std::vector<uint8_t> get_printing_data() const override;
 
-    friend class LabelCreator;
+    friend class ProductLabelCreator;
 };
 
 

@@ -3,11 +3,11 @@
 #include <iomanip>
 #include <yaml-cpp/yaml.h>
 
-#include "LabelCreator.h"
+#include "ProductLabelCreator.h"
 
-LabelCreator LabelCreator::_inst {};
+ProductLabelCreator ProductLabelCreator::_inst {};
 
-void LabelCreator::load_config(const std::string& _config_file) {
+void ProductLabelCreator::load_config(const std::string& _config_file) {
     _inst.config_file = _config_file;
     YAML::Node root = YAML::LoadFile(_inst.config_file);
 
@@ -56,13 +56,13 @@ void LabelCreator::load_config(const std::string& _config_file) {
     }
 }
 
-inline void LabelCreator::reload_config() {
+inline void ProductLabelCreator::reload_config() {
     if(_inst.config_file.empty())
         throw std::runtime_error("No config file to reload");
-    LabelCreator::load_config(_inst.config_file);
+    ProductLabelCreator::load_config(_inst.config_file);
 }
 
-cairo_surface_t *LabelCreator::create_label_surface(const ProductLabel& label) {
+cairo_surface_t *ProductLabelCreator::create_label_surface(const ProductLabel& label) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, ProductLabel::dimensions.width_pt, ProductLabel::dimensions.height_pt);
     cairo_t *cr = cairo_create(surface);
 
@@ -138,7 +138,7 @@ cairo_surface_t *LabelCreator::create_label_surface(const ProductLabel& label) {
     return surface;
 }
 
-void LabelCreator::calculate_font_size(cairo_t *cr, const std::string &text, Binding bind) {
+void ProductLabelCreator::calculate_font_size(cairo_t *cr, const std::string &text, Binding bind) {
     const TextBox& text_box = text_boxes.at(bind);
 
     const double max_width = (text_box.top_right.x - text_box.bottom_left.x) * ProductLabel::dimensions.width_pt;
@@ -152,7 +152,7 @@ void LabelCreator::calculate_font_size(cairo_t *cr, const std::string &text, Bin
     } while(ext.width > max_width * (1 - text_box_margin_x));
 }
 
-void LabelCreator::print_text(cairo_t *cr, const std::string& text, const Binding bind) {
+void ProductLabelCreator::print_text(cairo_t *cr, const std::string& text, const Binding bind) {
     const TextBox& text_box = text_boxes.at(bind);
 
     cairo_text_extents_t ext;
@@ -192,13 +192,13 @@ void LabelCreator::print_text(cairo_t *cr, const std::string& text, const Bindin
         cairo_select_font_face(cr, global_font.face.c_str(), global_font.slant, global_font.weight);
 }
 
-void LabelCreator::export_to_png(const ProductLabel &label, const std::string& filename) {
-    cairo_surface_t *surface = LabelCreator::create_label_surface(label);
+void ProductLabelCreator::export_to_png(const ProductLabel &label, const std::string& filename) {
+    cairo_surface_t *surface = ProductLabelCreator::create_label_surface(label);
     cairo_surface_write_to_png(surface, filename.c_str());
     cairo_surface_destroy(surface);
 }
 
-std::chrono::hours LabelCreator::detect_duration(const std::string &date) {
+std::chrono::hours ProductLabelCreator::detect_duration(const std::string &date) {
     const char interval_specifier = date[date.size() - 1];
 
     int interval;
@@ -212,7 +212,7 @@ std::chrono::hours LabelCreator::detect_duration(const std::string &date) {
     return std::chrono::hours(interval);
 }
 
-std::string LabelCreator::date_to_str(const std::chrono::system_clock::time_point& base) {
+std::string ProductLabelCreator::date_to_str(const std::chrono::system_clock::time_point& base) {
     std::stringstream buffer {};
 
     const std::time_t base_time = std::chrono::system_clock::to_time_t(base);

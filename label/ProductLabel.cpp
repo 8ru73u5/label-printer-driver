@@ -1,5 +1,5 @@
 #include "ProductLabel.h"
-#include "LabelCreator.h"
+#include "ProductLabelCreator.h"
 
 ProductLabel::ProductLabel(std::string _name, ProductUsage _usage, std::optional<std::time_t> start,
         std::optional<std::string> ready, std::string discard) noexcept
@@ -57,11 +57,11 @@ std::vector<uint8_t> ProductLabel::prepare_for_printing(cairo_surface_t *surface
     uint8_t pixel_octet = 0;    // Store subsequent pixel values
     uint8_t pixels_packed = 7;  // Tell how many pixels are remaining in order to fill pixel_octet
 
-    for(auto i = 0, offset = 0; i < Label::dimensions.width_pt; ++i, offset += 4) {
+    for(unsigned i = 0, offset = 0; i < Label::dimensions.width_pt; ++i, offset += 4) {
         // Add print data command to the beginning of the next packet
         printing_data.insert(printing_data.end(), {0x67, 0x00, 0x5a});
 
-        for(auto k = 0; k < Label::dimensions.height_pt; ++k) {
+        for(unsigned k = 0; k < Label::dimensions.height_pt; ++k) {
             const bool pixel = thresh(label_data + (k * stride + offset));
             pixel_octet |= static_cast<uint8_t>(pixel << pixels_packed);  // Set pixel value
 
@@ -94,7 +94,7 @@ inline bool ProductLabel::thresh(const unsigned char *pix, int threshold) noexce
 }
 
 std::vector<uint8_t> ProductLabel::get_printing_data() const {
-    cairo_surface_t *label_surface = LabelCreator::create_label_surface(*this);
+    cairo_surface_t *label_surface = ProductLabelCreator::create_label_surface(*this);
     std::vector<uint8_t> printing_data = prepare_for_printing(label_surface);
     cairo_surface_destroy(label_surface);
 
