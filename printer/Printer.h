@@ -33,8 +33,6 @@ private:
     void send_page_data(const Label& page_data, bool last_page);
 
 public:
-    static constexpr std::array<uint8_t, 3> print_data_cmd {0x67, 0x00, 0x5a};  // Used in Label
-
     Printer();
     ~Printer() noexcept;
 
@@ -44,7 +42,7 @@ public:
     void init();
 
     PrinterStatus send_request_status();
-    void print(const std::vector<Label>& labels, PrinterJobData job_data);
+    void print(const std::vector<Label*>& labels, PrinterJobData job_data);
 };
 
 

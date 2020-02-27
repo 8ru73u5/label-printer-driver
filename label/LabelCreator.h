@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <cairo/cairo.h>
 #include <chrono>
+#include <cairo/cairo.h>
+
 #include "Label.h"
+#include "ProductLabel.h"
 
 namespace {
     struct Point {
@@ -111,8 +113,8 @@ public:
     static void load_config(const std::string& config_file);
     inline static void reload_config();
 
-    [[nodiscard]] static cairo_surface_t *create_label_surface(const Label& label);
-    static void export_to_png(const Label& label, const std::string& filename);
+    [[nodiscard]] static cairo_surface_t *create_label_surface(const ProductLabel& label);
+    static void export_to_png(const ProductLabel& label, const std::string& filename);
 };
 
 

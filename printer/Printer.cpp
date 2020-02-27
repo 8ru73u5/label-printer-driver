@@ -5,7 +5,6 @@
 #include <array>
 #include <cstring>
 #include <vector>
-#include <algorithm>
 
 using std::cout, std::endl;
 
@@ -174,7 +173,7 @@ void Printer::send_page_data(const Label& label, const bool last_page) {
     cout << "done!" << endl;
 }
 
-void Printer::print(const std::vector<Label>& labels, PrinterJobData job_data) {
+void Printer::print(const std::vector<Label*>& labels, PrinterJobData job_data) {
     clear_jobs();
     init();
 
@@ -184,7 +183,7 @@ void Printer::print(const std::vector<Label>& labels, PrinterJobData job_data) {
             job_data.set_is_starting_page(false);
 
         send_job_data(job_data);
-        send_page_data(labels[i], i == labels.size() - 1);
+        send_page_data(*labels[i], i == labels.size() - 1);
 
         PrinterStatus status = receive_status();
         status.display();

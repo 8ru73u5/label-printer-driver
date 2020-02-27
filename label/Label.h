@@ -4,27 +4,18 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <cairo/cairo.h>
-#include <yaml-cpp/yaml.h>
-#include <ctime>
-
-enum class ProductUsage {
-    BOARD,
-    PREP,
-    STORAGE
-};
-
-enum class LabelType {
-    DIE_CUT,
-    CONTINUOUS_LENGTH,
-    UNDEFINED
-};
 
 struct LabelDimensions {
     uint8_t width_mm;
     uint8_t height_mm;
     uint32_t width_pt;
     uint32_t height_pt;
+};
+
+enum class LabelType {
+    DIE_CUT,
+    CONTINUOUS_LENGTH,
+    UNDEFINED
 };
 
 namespace LabelSubtypes {
@@ -39,7 +30,7 @@ namespace LabelSubtypes {
         DC_62x100 = 275, DC_102x51 = 365, DC_102x152 = 366
     };
 
-    const std::map<ContinuousLength, LabelDimensions> continuous_length_dimensions {
+    const std::map<ContinuousLength, LabelDimensions> __continuous_length_dimensions {
             {ContinuousLength::CL_12,  { 0,  12, 0, 106  }},
             {ContinuousLength::CL_29,  { 0,  29, 0, 306  }},
             {ContinuousLength::CL_38,  { 0,  38, 0, 413  }},
@@ -49,7 +40,7 @@ namespace LabelSubtypes {
             {ContinuousLength::CL_102, { 0, 102, 0, 1164 }}
     };
 
-    const std::map<DieCut, LabelDimensions> die_cut_dimensions {
+    const std::map<DieCut, LabelDimensions> __die_cut_dimensions {
             {LabelSubtypes::DieCut::DC_17x54,   { 54,   17,  566, 165  }},
             {LabelSubtypes::DieCut::DC_17x87,   { 87,   17,  956, 165  }},
             {LabelSubtypes::DieCut::DC_23x23,   { 23,   23,  202, 236  }},
@@ -65,35 +56,20 @@ namespace LabelSubtypes {
 }
 
 class Label {
-private:
+protected:
     static LabelType label_type;
     static LabelDimensions dimensions;
 
-    const std::string product_name;
-    const ProductUsage product_usage;
-    std::optional<std::time_t> start_date;
-    const std::optional<std::string> ready_date;
-    const std::string discard_date;
-
-    std::vector<uint8_t> prepare_for_printing(cairo_surface_t *surface) const noexcept;
-    inline static bool thresh(const unsigned char *pix, int threshold = 190) noexcept;
-
-    static Label from_yaml_node(const YAML::Node& node, ProductUsage usage);
-
 public:
-    Label(std::string product, ProductUsage usage, std::optional<std::time_t> start, std::optional<std::string> ready, std::string discard) noexcept;
+    Label();
+    virtual ~Label() = default;
 
-    void set_start_date(std::optional<std::time_t> start) noexcept;
+    static void set_die_cut_label_type(LabelSubtypes::DieCut label_type, bool high_quality = false);
+    static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength label_type, int width_mm, bool high_quality = false);
 
-    static void set_die_cut_label_type(LabelSubtypes::DieCut _label_type, bool high_quality = false) noexcept;
-    static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength _label_type, int width_mm, bool high_quality = false) noexcept;
+    [[nodiscard]] virtual std::vector<uint8_t> get_printing_data() const = 0;
 
-    [[nodiscard]] std::vector<uint8_t> get_printing_data() const noexcept;
-
-    [[nodiscard]] static std::vector<Label> load_label_definitions(const std::string& def_file);
-
-    friend class LabelCreator;
-    friend class PrinterJobData;
+    friend class PrinterJobData;  // Access label dimensions
 };
 
 

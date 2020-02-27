@@ -1,9 +1,9 @@
-#include "LabelCreator.h"
-
-#include <yaml-cpp/yaml.h>
 #include <algorithm>
 #include <chrono>
 #include <iomanip>
+#include <yaml-cpp/yaml.h>
+
+#include "LabelCreator.h"
 
 LabelCreator LabelCreator::_inst {};
 
@@ -62,8 +62,8 @@ inline void LabelCreator::reload_config() {
     LabelCreator::load_config(_inst.config_file);
 }
 
-cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
-    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, Label::dimensions.width_pt, Label::dimensions.height_pt);
+cairo_surface_t *LabelCreator::create_label_surface(const ProductLabel& label) {
+    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, ProductLabel::dimensions.width_pt, ProductLabel::dimensions.height_pt);
     cairo_t *cr = cairo_create(surface);
 
     /* Draw background */
@@ -74,15 +74,15 @@ cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
     cairo_set_source_rgb(cr, 0, 0, 0);
     cairo_set_line_width(cr, _inst.guide_width);
     for(const auto& guide: _inst.guides) {
-        cairo_move_to(cr, Label::dimensions.width_pt * guide.start.x, Label::dimensions.height_pt * guide.start.y);
-        cairo_line_to(cr, Label::dimensions.width_pt * guide.end.x, Label::dimensions.height_pt * guide.end.y);
+        cairo_move_to(cr, ProductLabel::dimensions.width_pt * guide.start.x, ProductLabel::dimensions.height_pt * guide.start.y);
+        cairo_line_to(cr, ProductLabel::dimensions.width_pt * guide.end.x, ProductLabel::dimensions.height_pt * guide.end.y);
     }
     cairo_stroke(cr);
 
     /* Draw product name */
     cairo_select_font_face(cr, _inst.global_font.face.c_str(), _inst.global_font.slant, _inst.global_font.weight);
-    std::string product_name = label.product_name + " (";
-    switch(label.product_usage) {
+    std::string product_name = label.name + " (";
+    switch(label.usage) {
         case ProductUsage::BOARD:   product_name += _inst.usage_board_text;   break;
         case ProductUsage::PREP:    product_name += _inst.usage_prep_text;    break;
         case ProductUsage::STORAGE: product_name += _inst.usage_storage_text; break;
@@ -141,8 +141,8 @@ cairo_surface_t *LabelCreator::create_label_surface(const Label& label) {
 void LabelCreator::calculate_font_size(cairo_t *cr, const std::string &text, Binding bind) {
     const TextBox& text_box = text_boxes.at(bind);
 
-    const double max_width = (text_box.top_right.x - text_box.bottom_left.x) * Label::dimensions.width_pt;
-    const double max_height = (text_box.bottom_left.y - text_box.top_right.y) * Label::dimensions.height_pt;
+    const double max_width = (text_box.top_right.x - text_box.bottom_left.x) * ProductLabel::dimensions.width_pt;
+    const double max_height = (text_box.bottom_left.y - text_box.top_right.y) * ProductLabel::dimensions.height_pt;
 
     cairo_text_extents_t ext;
     double font_size = max_height * (1 - text_box_margin_y);
@@ -158,12 +158,12 @@ void LabelCreator::print_text(cairo_t *cr, const std::string& text, const Bindin
     cairo_text_extents_t ext;
     cairo_text_extents(cr, text.c_str(), &ext);
 
-    const double max_width = (text_box.top_right.x - text_box.bottom_left.x) * Label::dimensions.width_pt;
-    const double max_height = (text_box.bottom_left.y - text_box.top_right.y) * Label::dimensions.height_pt;
+    const double max_width = (text_box.top_right.x - text_box.bottom_left.x) * ProductLabel::dimensions.width_pt;
+    const double max_height = (text_box.bottom_left.y - text_box.top_right.y) * ProductLabel::dimensions.height_pt;
 
-    const double tr_x = text_box.top_right.x * Label::dimensions.width_pt;
-    const double bl_x = text_box.bottom_left.x * Label::dimensions.width_pt;
-    const double bl_y = text_box.bottom_left.y * Label::dimensions.height_pt;
+    const double tr_x = text_box.top_right.x * ProductLabel::dimensions.width_pt;
+    const double bl_x = text_box.bottom_left.x * ProductLabel::dimensions.width_pt;
+    const double bl_y = text_box.bottom_left.y * ProductLabel::dimensions.height_pt;
 
     double text_x, text_y;
 
@@ -192,7 +192,7 @@ void LabelCreator::print_text(cairo_t *cr, const std::string& text, const Bindin
         cairo_select_font_face(cr, global_font.face.c_str(), global_font.slant, global_font.weight);
 }
 
-void LabelCreator::export_to_png(const Label &label, const std::string& filename) {
+void LabelCreator::export_to_png(const ProductLabel &label, const std::string& filename) {
     cairo_surface_t *surface = LabelCreator::create_label_surface(label);
     cairo_surface_write_to_png(surface, filename.c_str());
     cairo_surface_destroy(surface);
