@@ -5,6 +5,9 @@
 #include <map>
 #include <vector>
 
+/**
+ * Simple struct for holding label dimensions both in millimeters and pixels (points).
+ */
 struct LabelDimensions {
     uint8_t width_mm;
     uint8_t height_mm;
@@ -12,12 +15,25 @@ struct LabelDimensions {
     uint32_t height_pt;
 };
 
+/**
+ * Enum which holds all possible label types.
+ *
+ * `LabelType::UNDEFINED` is just for indication that the label type hasn't been set yet.
+ */
 enum class LabelType {
     DIE_CUT,
     CONTINUOUS_LENGTH,
     UNDEFINED
 };
 
+/**
+ * Namespace for label subtypes definition (die-cut and continuous length).
+ *
+ * For each enum type there is corresponding map which defines `LabelDimensions`
+ * for each subtype.
+ *
+ * @see LabelDimensions
+ */
 namespace LabelSubtypes {
     enum class ContinuousLength : int {
         CL_12 = 257, CL_29 = 258, CL_38 = 264, CL_50 = 262,
@@ -52,23 +68,70 @@ namespace LabelSubtypes {
     };
 }
 
+/**
+ * Base class for label representation.
+ *
+ * If you want to create another subtype of label (for example QR code label)
+ * you have to implement `Label::get_printing_data()` function.
+ */
 class Label {
 protected:
     static LabelType type;
     static LabelDimensions dimensions;
 
 public:
+    /**
+     * Default constructor that checks if `type` is set (is not `LabelType::UNDEFINED`.
+     *
+     * @throws std::runtime_exception if `type` is set to `LabelType::UNDEFINED`
+     * @see LabelType
+     */
     Label();
     virtual ~Label() = default;
 
+    /**
+     * Sets `type = LabelType:DIE_CUT`
+     *
+     * @param label_type Specific `DieCut` label type
+     * @param high_quality Print at 600dpi (in length dimension)
+     *
+     * @throws std::runtime_error if `label_type` is not supported
+     * @throws std::invalid_argument if label width is not in allowed range
+     * @see LabelSubtypes::DieCut
+     */
     static void set_die_cut_label_type(LabelSubtypes::DieCut label_type, bool high_quality = false);
+
+    /**
+     * Sets `type = LabelType::CONTINUOUS_LENGTH`
+     *
+     * @param label_type Specific `ContinuousLength` label type
+     * @param width_mm Desired width of the label in millimeters
+     * @param high_quality Print at 600dpi (in length dimension)
+     *
+     * @throws std::runtime_error if `label_type` is not supported
+     * @throws std::invalid_argument if label width is not in allowed range
+     * @see LabelSubtypes::ContinuousLength
+     */
     static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength label_type, int width_mm, bool high_quality = false);
 
     static LabelType get_type();
     static LabelDimensions get_dimensions();
 
+    /**
+     * @return `true` if `type` is not `LabelType::UNDEFINED`
+     */
     static bool is_valid();
 
+    /**
+     * Construct and return printing data packet.
+     *
+     * The printing data packet consists of *n* 93 bytes sub-packets where
+     * the first 3 bytes is a print data command and the rest is raster data
+     * composed of `1` or `0` values for each pixel. *n* is equal to `dimensions.width_pt`.
+     * Each sub-packet contains raster data of one column of the label image.
+     *
+     * @return printing data packet as `std::vector` of bytes
+     */
     [[nodiscard]] virtual std::vector<uint8_t> get_printing_data() const = 0;
 };
 
