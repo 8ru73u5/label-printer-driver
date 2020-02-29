@@ -4,7 +4,7 @@
 #include "printer/Printer.h"
 #include "printer/PrinterStatus.h"
 #include "label/Label.h"
-#include "label/LabelCreator.h"
+#include "label/ProductLabelCreator.h"
 
 using std::cout, std::endl;
 
@@ -18,17 +18,17 @@ int main() {
     PrinterStatus status(printer.send_request_status());
     status.display();
 
-    Label::set_die_cut_label_type(LabelSubtypes::DieCut::DC_29x90);
-    Label *label = new ProductLabel("Ketchup", ProductUsage::BOARD, std::nullopt, "2h", "4h");
+    Label::set_die_cut_label_type(LabelSubtypes::DieCut::DC_23x23);
+    Label *label = new ProductLabel("Ketchup", ProductUsage::BOARD, {}, "2h", "4h");
 
-    LabelCreator::load_config("../label/label_conf.yml");
+    ProductLabelCreator::load_config("../label/label_conf.yml");
+
+    // Save printed page
     auto *png = dynamic_cast<ProductLabel*>(label);
-    LabelCreator::export_to_png(*png, "out.png");
+    ProductLabelCreator::export_to_png(*png, "out.png");
 
-    auto label_defs = ProductLabel::load_label_definitions("../label/label_def_example.yml");
-
-    PrinterJobData job_data(*label);
-    job_data.set_quality(false);
+    PrinterJobData job_data {};
+    job_data.set_quality(true);
 
     std::vector<Label*> labels = {label};
 
@@ -38,8 +38,6 @@ int main() {
     if(choice == 'y') {
         printer.print(labels, job_data);
     }
-
-    std::for_each(label_defs.begin(), label_defs.end(), [](Label *i) { delete i; });
 
     return 0;
 }

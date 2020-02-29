@@ -24,7 +24,7 @@ private:
     uint8_t margin_amount;
 
 public:
-    explicit PrinterJobData(const Label& label) noexcept;
+    PrinterJobData() noexcept;
 
     void set_is_starting_page(bool starting_page) noexcept;
     void set_auto_cut_options(bool auto_cut, uint8_t cut_every_x_labels = 1) noexcept;

@@ -1,10 +1,14 @@
 #include "PrinterJobData.h"
 
-PrinterJobData::PrinterJobData(const Label &label) noexcept {
-    label_type = Label::label_type;
-    label_width = Label::dimensions.width_mm;
-    label_height = Label::dimensions.height_mm;
-    raster_number = Label::dimensions.width_pt;
+PrinterJobData::PrinterJobData() noexcept {
+    if(!Label::is_valid())
+        throw std::runtime_error("Label type not set! Use provided static function to set it");
+
+    label_type = Label::get_type();
+    const LabelDimensions dimensions = Label::get_dimensions();
+    label_width = dimensions.width_mm;
+    label_height = dimensions.height_mm;
+    raster_number = dimensions.width_pt;
 
     starting_page = true;
     auto_cut = false;
