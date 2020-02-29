@@ -21,7 +21,7 @@ private:
     bool high_quality;
     bool print_600dpi;
 
-    uint8_t margin_amount;
+    uint16_t margin_amount;
 
 public:
     PrinterJobData() noexcept;

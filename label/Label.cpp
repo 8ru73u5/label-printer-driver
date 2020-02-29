@@ -28,9 +28,10 @@ void Label::set_continuous_length_label_type(LabelSubtypes::ContinuousLength _la
         throw std::runtime_error("This label type is not supported");
 
     Label::type = LabelType::CONTINUOUS_LENGTH;
-    Label::dimensions.height_mm = lab_it->second.height_mm;
     Label::dimensions.width_mm = width_mm;
+    Label::dimensions.height_mm = lab_it->second.height_mm;
     Label::dimensions.width_pt = static_cast<uint32_t>(round(width_mm * 0.03937 * 300));
+    Label::dimensions.height_pt = lab_it->second.height_pt;
 
     if(high_quality)
         Label::dimensions.width_pt *= 2;

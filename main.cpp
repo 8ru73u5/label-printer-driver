@@ -18,7 +18,7 @@ int main() {
     PrinterStatus status(printer.send_request_status());
     status.display();
 
-    Label::set_die_cut_label_type(LabelSubtypes::DieCut::DC_23x23);
+    Label::set_continuous_length_label_type(LabelSubtypes::ContinuousLength::CL_29, 40);
     Label *label = new ProductLabel("Ketchup", ProductUsage::BOARD, {}, "2h", "4h");
 
     ProductLabelCreator::load_config("../label/label_conf.yml");
@@ -29,6 +29,7 @@ int main() {
 
     PrinterJobData job_data {};
     job_data.set_quality(true);
+    job_data.set_cut_at_end(true);
 
     std::vector<Label*> labels = {label};
 

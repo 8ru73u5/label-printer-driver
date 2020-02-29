@@ -6,7 +6,7 @@ PrinterJobData::PrinterJobData() noexcept {
 
     label_type = Label::get_type();
     const LabelDimensions dimensions = Label::get_dimensions();
-    label_width = dimensions.width_mm;
+    label_width = label_type == LabelType::DIE_CUT ? dimensions.width_mm : 0;
     label_height = dimensions.height_mm;
     raster_number = dimensions.width_pt;
 
@@ -52,10 +52,11 @@ std::vector<uint8_t> PrinterJobData::construct_job_data_message() const noexcept
         static_cast<uint8_t>((raster_number >> 8u) & 0xffu),
         static_cast<uint8_t>((raster_number >> 16u) & 0xffu),
         static_cast<uint8_t>((raster_number >> 24u) & 0xffu),
-        static_cast<uint8_t>(starting_page),
+        static_cast<uint8_t>(starting_page ? 0x00 : 0x01),
         0x00
     };
     job_data.insert(job_data.end(), set_print_information.begin(), set_print_information.end());
+    job_data.insert(job_data.end(), {0x00, 0x01, static_cast<unsigned char>(high_quality ? 0xce : 0x8e)});
 
     /* Set auto cut */
     std::array<uint8_t, 4> set_auto_cut_mode {
@@ -76,14 +77,15 @@ std::vector<uint8_t> PrinterJobData::construct_job_data_message() const noexcept
     /* Set expanded mode (cut at end and 600dpi printing) */
     std::array<uint8_t, 4> set_exp_mode {
         0x1b, 0x69, 0x4b,
-        static_cast<uint8_t>(static_cast<uint8_t>(cut_at_end << 4u) | static_cast<uint8_t>(print_600dpi << 6u))
+        static_cast<uint8_t>(static_cast<uint8_t>(cut_at_end << 3u) | static_cast<uint8_t>(print_600dpi << 6u))
     };
     job_data.insert(job_data.end(), set_exp_mode.begin(), set_exp_mode.end());
 
     /* Set margin amount */
     std::array<uint8_t, 5> set_margin {
         0x1b, 0x69, 0x64,
-        0x00, margin_amount
+        static_cast<uint8_t>(margin_amount & 0xff),
+        static_cast<uint8_t>((margin_amount >> 8u) & 0xff)
     };
     job_data.insert(job_data.end(), set_margin.begin(), set_margin.end());
 
