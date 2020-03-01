@@ -93,26 +93,23 @@ public:
      * Sets `type = LabelType:DIE_CUT`
      *
      * @param label_type Specific `DieCut` label type
-     * @param high_quality Print at 600dpi (in length dimension)
      *
      * @throws std::runtime_error if `label_type` is not supported
-     * @throws std::invalid_argument if label width is not in allowed range
      * @see LabelSubtypes::DieCut
      */
-    static void set_die_cut_label_type(LabelSubtypes::DieCut label_type, bool high_quality = false);
+    static void set_die_cut_label_type(LabelSubtypes::DieCut label_type);
 
     /**
      * Sets `type = LabelType::CONTINUOUS_LENGTH`
      *
      * @param label_type Specific `ContinuousLength` label type
      * @param width_mm Desired width of the label in millimeters
-     * @param high_quality Print at 600dpi (in length dimension)
      *
      * @throws std::runtime_error if `label_type` is not supported
      * @throws std::invalid_argument if label width is not in allowed range
      * @see LabelSubtypes::ContinuousLength
      */
-    static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength label_type, int width_mm, bool high_quality = false);
+    static void set_continuous_length_label_type(LabelSubtypes::ContinuousLength label_type, int width_mm);
 
     static LabelType get_type();
     static LabelDimensions get_dimensions();
