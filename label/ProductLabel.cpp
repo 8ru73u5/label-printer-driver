@@ -16,7 +16,7 @@ ProductLabel::ProductLabel(const YAML::Node& node, const ProductUsage _usage) {
         case ProductUsage::BOARD:   usage_str = "board";   break;
         case ProductUsage::PREP:    usage_str = "prep";    break;
         case ProductUsage::STORAGE: usage_str = "storage"; break;
-        default: throw std::runtime_error("Attempt to use unimplemented ProductUsage");
+        default: throw std::invalid_argument("Attempt to use unimplemented ProductUsage");
     }
 
     if(!node["name"])
@@ -25,6 +25,7 @@ ProductLabel::ProductLabel(const YAML::Node& node, const ProductUsage _usage) {
 
     if(!node[usage_str])
         throw std::runtime_error("You don't have '" + usage_str + "' for '" + name + "' product in your config file");
+
     ready_date = node[usage_str]["ready"] ?
             std::optional<std::string>(node[usage_str]["ready"].as<std::string>())
                     : std::nullopt;
@@ -34,7 +35,7 @@ ProductLabel::ProductLabel(const YAML::Node& node, const ProductUsage _usage) {
     discard_date = node[usage_str]["discard"].as<std::string>();
 }
 
-inline void ProductLabel::set_start_date(std::optional<std::time_t> start) noexcept {
+void ProductLabel::set_start_date(std::optional<std::time_t> start) noexcept {
     start_date = start;
 }
 
@@ -48,7 +49,7 @@ std::vector<uint8_t> ProductLabel::prepare_for_printing(cairo_surface_t *surface
 
     const unsigned char *label_data = cairo_image_surface_get_data(surface);
     if(cairo_image_surface_get_format(surface) != CAIRO_FORMAT_RGB24)
-        throw std::runtime_error("Wrong label surface format - should be RGB24");
+        throw std::invalid_argument("Wrong label surface format - should be RGB24");
 
     const int stride = cairo_image_surface_get_stride(surface);  // Number of bytes per label row
     const bool unaligned_pixels = Label::dimensions.height_pt % 8 != 0;
@@ -101,7 +102,7 @@ std::vector<uint8_t> ProductLabel::get_printing_data() const {
     return printing_data;
 }
 
-std::vector<Label*> ProductLabel::load_label_definitions(const std::string &def_file) {
+std::vector<std::shared_ptr<Label>> ProductLabel::load_label_definitions(const std::string &def_file) {
     const YAML::Node root = YAML::LoadFile(def_file);
     if(!root["products"])
         throw std::runtime_error("No 'products' key found in label definition file: " + def_file);
@@ -110,14 +111,14 @@ std::vector<Label*> ProductLabel::load_label_definitions(const std::string &def_
     if(!products.IsSequence())
         throw std::runtime_error("'products' should be a sequence in label definition file: " + def_file);
 
-    std::vector<Label*> labels {};
+    std::vector<std::shared_ptr<Label>> labels {};
     for(const auto& i: products) {
         if(i["board"])
-            labels.push_back(new ProductLabel(i, ProductUsage::BOARD));
+            labels.push_back(std::make_shared<ProductLabel>(ProductLabel(i, ProductUsage::BOARD)));
         if(i["prep"])
-            labels.push_back(new ProductLabel(i, ProductUsage::PREP));
+            labels.push_back(std::make_shared<ProductLabel>(ProductLabel(i, ProductUsage::PREP)));
         if(i["storage"])
-            labels.push_back(new ProductLabel(i, ProductUsage::STORAGE));
+            labels.push_back(std::make_shared<ProductLabel>(ProductLabel(i, ProductUsage::STORAGE)));
     }
 
     return labels;
